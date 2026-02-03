@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -19,29 +21,35 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
 
+      # 3. Login to Amazon ECR
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ap-northeast-1 \
           | docker login --username AWS --password-stdin 787169319732.dkr.ecr.ap-northeast-1.amazonaws.com
 
+      # 4. Build Docker image
       - name: Build Docker image
         run: docker build -t ecs-repo1:${{ github.sha }} .
 
+      # 5. Tag Docker image
       - name: Tag Docker image
         run: docker tag ecs-repo1:${{ github.sha }} 787169319732.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-repo1:${{ github.sha }}
 
+      # 6. Push image to ECR
       - name: Push to ECR
         run: docker push 787169319732.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-repo1:${{ github.sha }}
 
+      # 7. Update ECS task definition
       - name: Update ECS task definition
         run: |
           sed -i "s|<IMAGE>|787169319732.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-repo1:${{ github.sha }}|g" ecs-task.json
           aws ecs register-task-definition --cli-input-json file://ecs-task.json
 
+      # 8. Deploy to ECS
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster ECS-Cluster1 \
-            --service ECS-Service1 \
-            --task-definition ECS-Task1 \
+            --cluster ecs-cluster1 \
+            --service ecs-service1 \
+            --task-definition ecs-task1 \
             --force-new-deployment
