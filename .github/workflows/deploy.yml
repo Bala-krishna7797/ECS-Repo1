@@ -51,5 +51,5 @@ jobs:
           aws ecs update-service \
             --cluster ecs-cluster1 \
             --service ecs-service1 \
-            --task-definition ecs-task1 \
+            --task-definition ECS-Task1 \
             --force-new-deployment
