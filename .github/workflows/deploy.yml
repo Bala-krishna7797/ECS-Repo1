@@ -50,6 +50,6 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster ecs-cluster1 \
-            --service ecs-service1 \
-            --task-definition ECS-Task1 \
+            --service ecs-task1-service-kwgy1fai \
+            --task-definition ecs-task1 \
             --force-new-deployment
